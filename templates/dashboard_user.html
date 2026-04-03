@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="dashboard-shell">
+<section class="panel dashboard-hero">
+  <h1>License Command Center</h1>
+  <p>Manage keys, security, and support from one battle station.</p>
+  <div class="hero-actions">
+    <a class="btn" href="{{ url_for('pricing') }}">View Plans</a>
+  </div>
+</section>
+
+<section class="kpi-grid">
+  <article class="kpi-card">
+    <h2>Purchases</h2>
+    <div class="kpi-value">{{ rows|length }}</div>
+  </article>
+  <article class="kpi-card">
+    <h2>Timeline Events</h2>
+    <div class="kpi-value">{{ events|length }}</div>
+  </article>
+  <article class="kpi-card">
+    <h2>Free Status</h2>
+    <div class="kpi-value">
+      {% if free_state.status == 'active' %}ACTIVE{% elif free_state.status == 'cooldown' %}COOLDOWN{% elif free_state.status == 'expired' %}EXPIRED{% else %}NONE{% endif %}
+    </div>
+  </article>
+</section>
+
+<section class="panel">
+  <h2>Free Access Status</h2>
+  {% if free_state.status == 'active' %}
+  <p><span class="pill approved">active</span> Free key is active.</p>
+  <p>Time left: <strong id="free-remaining" data-seconds="{{ free_state.remaining_seconds }}">--:--</strong></p>
+  {% elif free_state.status == 'cooldown' %}
+  <p><span class="pill pending">cooldown</span> Free key expired. Wait before renew.</p>
+  <p>Cooldown left: <strong id="free-cooldown" data-seconds="{{ free_state.cooldown_seconds }}">--:--</strong></p>
+  {% elif free_state.status == 'expired' %}
+  <p><span class="pill rejected">expired</span> You can reorder the free key now.</p>
+  {% else %}
+  <p>No free key active yet.</p>
+  {% endif %}
+</section>
+
+<section class="dashboard-split">
+  <article class="panel">
+    <h2>Account Security</h2>
+    <p>Last login: {{ user.last_login_at|fmt_est if user and user.last_login_at else '-' }}</p>
+    <p>Current session started: {{ session_started_at|fmt_est if session_started_at else '-' }}</p>
+    <p>Active sessions: 1 (this device)</p>
+    <form method="post" action="{{ url_for('change_password') }}" class="stack">
+      <label>Current Password
+        <input name="current_password" type="password" required>
+      </label>
+      <label>New Password
+        <input name="new_password" type="password" minlength="7" required>
+      </label>
+      <label>Confirm New Password
+        <input name="confirm_password" type="password" minlength="7" required>
+      </label>
+      <button class="btn btn-primary" type="submit">Change Password</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h2>Need Help?</h2>
+    <p class="helper-text">Send support with category + detail and we will review it in admin control.</p>
+    <form method="post" action="{{ url_for('support_request') }}" class="stack">
+      <label>Category
+        <input name="category" placeholder="payment, key, login, other" required>
+      </label>
+      <label>Message
+        <input name="message" placeholder="Describe your issue" required>
+      </label>
+      <button class="btn btn-primary" type="submit">Send Support Request</button>
+    </form>
+  </article>
+</section>
+
+<section class="panel table-shell">
+  <table class="mobile-cards">
+    <thead>
+      <tr>
+        <th>ID</th><th>Plan</th><th>Status</th><th>Reason</th><th>Amount</th><th>License Key</th><th>Copy</th><th>Auto Renew</th><th>Purchased (EST)</th><th>Ends (EST)</th><th>End Time (EST)</th><th>Payment Ref</th><th>Tags</th><th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td data-label="ID">{{ row.id }}</td>
+        <td data-label="Plan">{{ plan_config[row.plan_code]['label'] if row.plan_code in plan_config else row.plan_code }}</td>
+        <td data-label="Status"><span class="pill {{ row.status }}">{{ 'failedpayment/notpaid' if row.status == 'pending' else row.status }}</span></td>
+        <td data-label="Reason">{{ row.status_reason or '-' }}</td>
+        <td data-label="Amount">${{ '%.0f'|format(row.amount_usd) }}</td>
+        <td data-label="License Key">{{ row.license_key or '-' }}</td>
+        <td data-label="Copy">
+          {% if row.status == 'approved' and row.license_key %}
+          <button class="btn btn-copy" type="button" data-license="{{ row.license_key }}">Copy</button>
+          {% else %}
+          -
+          {% endif %}
+        </td>

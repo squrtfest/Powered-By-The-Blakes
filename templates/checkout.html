@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pricing-shell">
+<section class="hero panel pricing-hero">
+  <div class="pricing-kicker">SECURE CHECKOUT</div>
+  <h1>Complete Your Purchase</h1>
+  <p>Multiple payment methods available through PayPal: PayPal wallet, Venmo, Pay Later, and credit cards.</p>
+  <div class="no-refund-banner">NO REFUNDS - ALL SALES ARE FINAL</div>
+</section>
+
+<section class="panel">
+  <div class="checkout-container">
+    <div class="checkout-review">
+      <h2>Order Summary</h2>
+      
+      <div class="review-items">
+        {% for item in items %}
+        <div class="review-item">
+          <div class="item-info">
+            <strong>{{ item.label }}</strong>
+            {% if item.auto_renew %}<span class="badge">Auto-Renew Enabled</span>{% endif %}
+          </div>
+          <div class="item-price">
+            <span>Qty: {{ item.quantity }}</span>
+            <span>${{ "%.2f"|format(item.subtotal) }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="pricing-breakdown">
+        <div class="breakdown-row">
+          <span>Subtotal:</span>
+          <span>${{ "%.2f"|format(cart.total_amount) }}</span>
+        </div>
+        <div class="breakdown-row" style="color: #f7a73a;">
+          <span><strong>PayPal Processing Fee (2.2% + $0.30):</strong></span>
+          <span>${{ "%.2f"|format(cart.total_amount * 0.022 + 0.30) }}</span>
+        </div>
+        <div class="breakdown-row total">
+          <span>Total Due:</span>
+          <span>${{ "%.2f"|format(cart.total_amount * 1.022 + 0.30) }}</span>
+        </div>
+      </div>
+
+      <div class="payment-methods-info">
+        <h3>Accepted Payment Methods</h3>
+        <ul>
+          <li>PayPal Account</li>
+          <li>Venmo (via PayPal)</li>
+          <li>Pay Later Plans (via PayPal)</li>
+          <li>Credit/Debit Cards (Visa, Mastercard, American Express)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="checkout-actions">
+      <button id="paypal-button" class="btn btn-primary btn-large">
+        <strong>Pay with PayPal</strong>
+        <span>Secure hosted checkout</span>
+      </button>
+      
+      <a href="{{ url_for('view_cart') }}" class="btn btn-outline">Back to Cart</a>
+    </div>
+
+    {% if error %}
+    <div class="error-message">
+      <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="panel legal-panel">
+  <h2>Purchase & Refund Policy</h2>
+  <p><strong style="color: #c1121f;">⚠️ NO REFUNDS - ALL SALES ARE FINAL</strong></p>
+  <p>By clicking the payment button, you agree to the following terms:</p>
+  <ul>
+    <li>All purchases are final and non-refundable</li>
+    <li>License keys are delivered immediately upon successful payment verification</li>
+    <li>License terms and conditions apply as expected for digital software licenses</li>
+    <li>If you have issues with your order, contact support</li>
+  </ul>
+  <p><strong>Support:</strong> {{ support_email }}</p>
+</section>
+</div>
+
+<style>
+.checkout-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.checkout-review {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}

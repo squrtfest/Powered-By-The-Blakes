@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pricing-shell">
+<section class="hero panel pricing-hero">
+  <div class="pricing-kicker">THEBLAKES LICENSE ARMORY</div>
+  <h1>Choose Your Access Tier</h1>
+  <p>Unlock the exact level you need. Fast checkout, fast activation, zero nonsense.</p>
+  <div class="hero-actions">
+    {% if session.get('user_id') %}
+    <a href="{{ url_for('view_cart') }}" class="btn btn-outline">View Shopping Cart</a>
+    {% else %}
+    <a class="btn" href="{{ url_for('register') }}">Create Account</a>
+    {% endif %}
+  </div>
+  <div class="no-refund-banner">⚠️ NO REFUNDS - ALL SALES ARE FINAL ⚠️</div>
+  <div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; margin-top: 10px; text-align: center;">
+    <strong>Multiple Payment Methods:</strong> Pay with PayPal, Venmo, Pay Later, or credit cards
+  </div>
+</section>
+
+{% for code, label, price, desc, feats in plans %}
+{% if code == 'LIFE' %}
+<section class="panel life-wide-shell">
+  <article class="card plan-card plan-life plan-life-wide">
+    <div class="plan-head">
+      <h2>{{ label }}</h2>
+      <span class="plan-code">{{ code }}</span>
+    </div>
+    <div class="price">{{ price }}</div>
+    <p class="plan-desc">{{ desc }}</p>
+    <div class="feature-list">
+      {% for f in feats %}
+      <div class="feature-item">- {{ f }}</div>
+      {% endfor %}
+    </div>
+    {% if session.get('user_id') %}
+    <div class="button-group stack">
+      <button class="btn btn-primary add-to-cart-btn" data-plan-code="{{ code }}" data-plan-label="{{ label }}">+ Add to Cart</button>
+      <form action="{{ url_for('buy_plan', plan_code=code) }}" method="post" style="width: 100%;">
+        <button class="btn btn-outline" type="submit" style="width: 100%;">Buy Now (Direct Checkout)</button>
+      </form>
+    </div>
+    {% else %}
+    <a class="btn btn-primary" href="{{ url_for('login') }}">Login to Buy</a>
+    {% endif %}
+  </article>
+</section>
+{% endif %}
+{% endfor %}
+
+<section class="cards pricing-grid">
+  {% for code, label, price, desc, feats in plans %}
+  {% if code != 'LIFE' %}
+  <article class="card plan-card plan-{{ code|lower }}">
+    <div class="plan-head">
+      <h2>{{ label }}</h2>
+      <span class="plan-code">{{ code }}</span>
+    </div>
+    <div class="price">{{ price }}</div>
+    <p class="plan-desc">{{ desc }}</p>
+    <div class="feature-list">
+      {% for f in feats %}
+      <div class="feature-item">- {{ f }}</div>
+      {% endfor %}
+    </div>
+    {% if session.get('user_id') %}
+    <div class="stack">
+      {% if code != 'FREE' %}
+      <label class="switch-row">
+        <span>Auto-Renew</span>
+        <span class="switch" title="Auto renew">
+          <input type="checkbox" class="auto-renew-checkbox" value="1" data-plan-code="{{ code }}" aria-label="Auto renew">
+          <span class="slider"></span>
+        </span>
+      </label>
+      {% endif %}
+      
+      <button class="btn btn-primary add-to-cart-btn" data-plan-code="{{ code }}" data-plan-label="{{ label }}">+ Add to Cart</button>
+      
+      <form action="{{ url_for('buy_plan', plan_code=code) }}" method="post">
+        {% if code not in ['FREE', 'LIFE'] %}
+        <label class="switch-row">
+          <span>Auto pay / auto renew</span>
+          <span class="switch" title="Auto renew">
+            <input type="checkbox" name="auto_renew" value="1" aria-label="Auto renew">
+            <span class="slider"></span>
+          </span>
+        </label>
+        {% endif %}
+        {% if session.get('is_admin') %}
+        <label>Tags (Admin only)
+          <input name="tags" placeholder="Farming, Combat, AFK">
+        </label>
+        <label>Notes (Admin only)
+          <input name="notes" placeholder="Optional notes">
+        </label>
+        {% endif %}
+        <button class="btn btn-outline" type="submit">
+          {% if code == 'FREE' %}
+          Get Free Key
+          {% else %}
+          Buy Now
+          {% endif %}
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <a class="btn btn-primary" href="{{ url_for('login') }}">Login to Buy</a>
+    {% endif %}
+  </article>
+  {% endif %}
+  {% endfor %}
+</section>
+
+<section class="panel legal-panel">
+  <h2>License Terms & Conditions</h2>
+  <p><strong>NO REFUNDS.</strong> All sales are final. Once payment is confirmed, licenses cannot be returned or refunded.</p>
+  <p>Digital licenses are delivered instantly upon successful payment verification.</p>
+  <p>Payment methods accepted: PayPal, Venmo, Pay Later, Credit Cards (Visa, Mastercard, American Express)</p>
+  <p>If you experience any issues, contact support at {{ support_email }}</p>
+</section>
+</div>
+
+<style>
+.pricing-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricing-hero {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.pricing-kicker {
+  color: #f7a73a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.pricing-grid {
+  margin-bottom: 30px;
+}
+
+.plan-card {
+  position: relative;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+}
+
+.plan-head {
+  margin-bottom: 12px;
+}
+
+.plan-code {
+  background: #2f9bff;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.price {
+  font-size: 36px;
+  font-weight: 700;
+  color: #8ad5ff;
+  margin: 12px 0;
+}
+
+.plan-desc {
+  margin: 8px 0 12px;
+  color: #9ec1f5;
+  font-size: 14px;
+}
+
+.feature-list {
+  text-align: left;
+  margin: 12px 0;
+}
+
+.feature-item {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #9ec1f5;
+}
+
+.button-group {
+  margin-top: 16px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #2d5ba0;
+  background: transparent;
+  color: #eaf3ff;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn:hover {
+  background: #2f9bff;
+  border-color: #2f9bff;
+}
+
+.btn-primary {
+  background: #2f9bff;
+  border-color: #2f9bff;
+}
+
+.btn-outline {
+  border-color: #2d5ba0;
+  background: transparent;
+}
+
+.btn-outline:hover {
+  background: rgba(47, 155, 255, 0.1);
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #9ec1f5;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  margin-left: 8px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2f9bff;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.legal-panel {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.no-refund-banner {
+  background: #c1121f;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin: 16px 0;
+  display: inline-block;
+}
+
+.hero-actions {
+  margin-top: 16px;
+}
+
+.life-wide-shell {
+  margin-bottom: 30px;
+}
+
+.plan-life-wide {
+  max-width: 600px;
+  margin: 0 auto;
+}
+</style>
+
+<script>
+// Cart functionality
+let cartCount = 0;
+
+function updateCartCount() {
+  const cartButtons = document.querySelectorAll('.add-to-cart-btn');
+  cartButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const planCode = this.getAttribute('data-plan-code');
+      const planLabel = this.getAttribute('data-plan-label');
+      const autoRenew = document.querySelector(`.auto-renew-checkbox[data-plan-code="${planCode}"]`);
+      const autoRenewValue = autoRenew ? autoRenew.checked : false;
+      
+      fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          plan_code: planCode,
+          quantity: 1,
+          auto_renew: autoRenewValue
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          alert(`${planLabel} added to cart!`);
+          cartCount = data.item_count;
+        } else {
+          alert('Failed to add to cart');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding to cart');
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateCartCount();
+});
+</script>
+{% endblock %}

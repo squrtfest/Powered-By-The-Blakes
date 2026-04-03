@@ -1,53 +1,45 @@
-# TheBlakes License Portal - Live Deployment
-
-This is a clean copy of the web portal ready for live deployment.
-
-## Files Included
-
-- `app.py` - Flask application with all routes and database logic
-- `static/` - CSS and styling (style.css)
-- `templates/` - HTML templates for all pages
-  - `base.html` - Base template with header/nav
-  - `pricing.html` - Pricing page
-  - `login.html` - Login page
-  - `register.html` - Registration page
-  - `forgot_password.html` - Password recovery
-  - `reset_password.html` - Password reset form
-  - `dashboard_user.html` - User dashboard
-  - `dashboard_admin.html` - Admin control panel
+# PayPal Commerce Platform Setup Guide
 
 ## Quick Start
 
-### 1. Install Dependencies
+Your live_portal now has the expanded checkout system with PayPal Commerce Platform integration. Follow these steps to get it working:
 
-```bash
-pip install flask werkzeug
+## Step 1: Get PayPal Credentials
+
+1. Go to https://developer.paypal.com
+2. Log in with your PayPal account (or create one)
+3. In the sidebar, click **Apps & Credentials**
+4. Make sure you're on the **Sandbox** tab (for testing)
+5. Under "Default Application", copy:
+   - **Client ID**
+   - **Secret**
+
+## Step 2: Set Environment Variables
+
+Before running your portal, set these environment variables (for **OpAutoClicker.shop**):
+
+### On Windows (PowerShell):
+```powershell
+$env:PAYPAL_CLIENT_ID="your-client-id-here"
+$env:PAYPAL_CLIENT_SECRET="your-client-secret-here"
+$env:PAYPAL_API_SANDBOX="1"
+$env:PORTAL_PUBLIC_BASE_URL="https://OpAutoClicker.shop"
 ```
 
-### 2. Environment Variables
+### On Windows (Command Prompt):
+```cmd
+set PAYPAL_CLIENT_ID=your-client-id-here
+set PAYPAL_CLIENT_SECRET=your-client-secret-here
+set PAYPAL_API_SANDBOX=1
+set PORTAL_PUBLIC_BASE_URL=https://OpAutoClicker.shop
+```
 
-Set these before running:
-
+### On Linux/Mac:
 ```bash
-# Optional - Flask app config
-set FLASK_ENV=production
-set FLASK_DEBUG=0
-
-# Portal settings
-set PORTAL_HOST=127.0.0.1
-set PORTAL_PORT=5050
-
-# PayPal integration
-set PAYPAL_BUSINESS=your-paypal-email@example.com
-set PAYPAL_CURRENCY=USD
-set PAYPAL_CHECKOUT_BASE=https://www.paypal.com/cgi-bin/webscr
-set PAYPAL_IPN_VERIFY_URL=https://ipnpb.paypal.com/cgi-bin/webscr
-
-# Public URL for password reset links (production)
-set PORTAL_PUBLIC_BASE_URL=https://your-domain.com
-
-# SMTP Email settings (optional, required for password reset/notifications)
-set PORTAL_SMTP_HOST=smtp.gmail.com
+export PAYPAL_CLIENT_ID="your-client-id-here"
+export PAYPAL_CLIENT_SECRET="your-client-secret-here"
+export PAYPAL_API_SANDBOX="1"
+export PORTAL_PUBLIC_BASE_URL="https://OpAutoClicker.shop"
 ```
 
 ## Step 3: Start the Portal
@@ -56,7 +48,7 @@ set PORTAL_SMTP_HOST=smtp.gmail.com
 python app.py
 ```
 
-Then navigate to: **https://your-domain.com** (or your server's configured port)
+Then navigate to: **https://OpAutoClicker.shop** (or your server's configured port)
 
 ## Step 4: Test the Checkout Flow
 
@@ -82,31 +74,22 @@ Then navigate to: **https://your-domain.com** (or your server's configured port)
 
 When ready to go live with real payments:
 
-### Step 1: Get PayPal Credentials
+### Step 1: Switch to Production Credentials
+Get your live PayPal credentials from https://developer.paypal.com (**Live** tab)
 
-1. Go to https://developer.paypal.com
-2. Log in with your PayPal account (or create one)
-3. In the sidebar, click **Apps & Credentials**
-4. Make sure you're on the **Sandbox** tab (for testing)
-5. Under "Default Application", copy:
-   - **Client ID**
-   - **Secret**
-
-### Step 2: Set Environment Variables
-
-```bash
-set PAYPAL_CLIENT_ID=your-live-client-id
-set PAYPAL_CLIENT_SECRET=your-live-client-secret
-set PAYPAL_API_SANDBOX=0  # Switch to production
-set PORTAL_PUBLIC_BASE_URL=https://your-domain.com
+### Step 2: Update Credentials for Production
+```powershell
+$env:PAYPAL_CLIENT_ID="your-live-client-id"
+$env:PAYPAL_CLIENT_SECRET="your-live-client-secret"
+$env:PAYPAL_API_SANDBOX="0"  # Switch to production
+$env:PORTAL_PUBLIC_BASE_URL="https://OpAutoClicker.shop"
 ```
 
 ### Step 3: Test with Live Endpoint
-
 - Users will see real PayPal checkout
 - Payments go to your actual business account
 - No sandbox watermarks
-- Domain will be https://your-domain.com for PayPal redirects
+- Domain will be https://OpAutoClicker.shop for PayPal redirects
 
 ## Troubleshooting
 

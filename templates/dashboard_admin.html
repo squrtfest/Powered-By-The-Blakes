@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel dashboard-hero">
+  <h1>Admin Control</h1>
+  <p>Track who paid and who did not. Approve to issue keys.</p>
+  <form action="{{ url_for('admin_delete_expired_keys') }}" method="post" class="inline">
+    <button class="btn btn-danger" type="submit">Delete Expired Keys</button>
+  </form>
+  <form action="{{ url_for('admin_email_test') }}" method="post" class="inline">
+    <input name="to_email" type="email" placeholder="SMTP test email" class="smtp-input">
+    <button class="btn btn-primary" type="submit">Send SMTP Test</button>
+  </form>
+</section>
+
+<section class="kpi-grid">
+  <article class="kpi-card"><h2>Total Users</h2><div class="kpi-value">{{ metrics.total_users }}</div></article>
+  <article class="kpi-card"><h2>Active Paid</h2><div class="kpi-value">{{ metrics.active_paid }}</div></article>
+  <article class="kpi-card"><h2>Expired Keys</h2><div class="kpi-value">{{ metrics.expired_keys }}</div></article>
+  <article class="kpi-card"><h2>Failed 24h</h2><div class="kpi-value">{{ metrics.failed_last_24h }}</div></article>
+</section>
+
+<section class="panel">
+  <h2>Failed Payment / Not Paid</h2>
+  <table class="mobile-cards">
+    <thead>
+      <tr>
+        <th>ID</th><th>User</th><th>Plan</th><th>Amount</th><th>Reason</th><th>Payment Ref</th><th>Tags</th><th>Notes</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in pending %}
+      <tr>
+        <td data-label="ID">{{ row.id }}</td>
+        <td data-label="User">{{ row.username }}</td>
+        <td data-label="Plan">{{ plan_config[row.plan_code]['label'] if row.plan_code in plan_config else row.plan_code }}</td>
+        <td data-label="Amount">${{ '%.0f'|format(row.amount_usd) }}</td>
+        <td data-label="Reason">{{ row.status_reason or '-' }}</td>
+        <td data-label="Payment Ref">{{ row.payment_ref or '-' }}</td>
+        <td data-label="Tags">{{ row.tags or '-' }}</td>
+        <td data-label="Notes">{{ row.notes or '-' }}</td>
+        <td data-label="Action">
+          <form action="{{ url_for('admin_approve', purchase_id=row.id) }}" method="post" class="inline"><button class="btn btn-primary" type="submit">Approve</button></form>
+          <form action="{{ url_for('admin_reject', purchase_id=row.id) }}" method="post" class="inline"><button class="btn btn-danger" type="submit">Reject</button></form>
+          <form action="{{ url_for('admin_delete_key', purchase_id=row.id) }}" method="post" class="inline"><button class="btn btn-danger" type="submit">Delete Key</button></form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9">No pending payments.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Recent Activity</h2>
+  <table class="mobile-cards">
+    <thead>
+      <tr>
+        <th>ID</th><th>User</th><th>Plan</th><th>Status</th><th>Reason</th><th>License</th><th>Purchased (EST)</th><th>Approved (EST)</th><th>Done Time (EST)</th><th>Ends (EST)</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in recent %}
+      <tr>
+        <td data-label="ID">{{ row.id }}</td>
+        <td data-label="User">{{ row.username }}</td>
+        <td data-label="Plan">{{ row.plan_code }}</td>
+        <td data-label="Status"><span class="pill {{ row.status }}">{{ 'failedpayment/notpaid' if row.status == 'pending' else row.status }}</span></td>
+        <td data-label="Reason">{{ row.status_reason or '-' }}</td>
+        <td data-label="License">{{ row.license_key or '-' }}</td>
+        <td data-label="Purchased (EST)">{{ row.created_at|fmt_est }}</td>
+        <td data-label="Approved (EST)">{{ row.approved_at|fmt_est if row.approved_at else '-' }}</td>
+        <td data-label="Done Time (EST)">{{ row.approved_at|fmt_est_time if row.approved_at else '-' }}</td>
+        <td data-label="Ends (EST)">{{ row.expires_at|fmt_est if row.expires_at else '-' }}</td>
+        <td data-label="Action">
+          {% if row.status != 'approved' %}
+          <form action="{{ url_for('admin_approve', purchase_id=row.id) }}" method="post" class="inline"><button class="btn btn-primary" type="submit">Approve</button></form>
+          {% endif %}
+          <form action="{{ url_for('admin_delete_key', purchase_id=row.id) }}" method="post" class="inline"><button class="btn btn-danger" type="submit">Delete Key</button></form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Support Requests</h2>
+  <table class="mobile-cards">
+    <thead>
+      <tr>
+        <th>ID</th><th>Email</th><th>Category</th><th>Message</th><th>Created (EST)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in support_rows %}
+      <tr>
+        <td data-label="ID">{{ row.id }}</td>
+        <td data-label="Email">{{ row.email }}</td>
+        <td data-label="Category">{{ row.category or '-' }}</td>

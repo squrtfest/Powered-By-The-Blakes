@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pricing-shell">
+<section class="hero panel pricing-hero">
+  <div class="pricing-kicker">SHOPPING CART</div>
+  <h1>Review Your Items</h1>
+  <p>Multiple payment methods available: PayPal, Venmo, Pay Later, and credit cards.</p>
+  <div class="no-refund-banner">NO REFUNDS - ALL SALES ARE FINAL</div>
+</section>
+
+<section class="panel">
+  {% if items %}
+  <div class="cart-container">
+    <table class="cart-table">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Auto-Renew</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="cart-item" data-item-id="{{ item.id }}">
+          <td class="plan-name">{{ item.label }}</td>
+          <td class="price">${{ "%.2f"|format(item.unit_price) }}</td>
+          <td class="quantity">{{ item.quantity }}</td>
+          <td class="subtotal">${{ "%.2f"|format(item.subtotal) }}</td>
+          <td class="auto-renew">{% if item.auto_renew %}<strong>Yes</strong>{% else %}No{% endif %}</td>
+          <td class="action">
+            <button class="btn btn-small btn-danger remove-item" data-item-id="{{ item.id }}">Remove</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span class="summary-label">Subtotal:</span>
+        <span class="summary-value">${{ "%.2f"|format(cart.total_amount) }}</span>
+      </div>
+      <div class="summary-row" style="color: #f7a73a;">
+        <span class="summary-label"><strong>PayPal Fees (2.2% + $0.30):</strong></span>
+        <span class="summary-value" id="paypal-fee">${{ "%.2f"|format(cart.total_amount * 0.022 + 0.30) }}</span>
+      </div>
+      <div class="summary-row" style="font-size: 1.2em; font-weight: bold; border-top: 2px solid #333; padding-top: 10px;">
+        <span class="summary-label">Total with Fees:</span>
+        <span class="summary-value" id="total-with-fees">${{ "%.2f"|format(cart.total_amount * 1.022 + 0.30) }}</span>
+      </div>
+    </div>
+
+    <div class="cart-actions">
+      <a href="{{ url_for('pricing') }}" class="btn">Continue Shopping</a>
+      <a href="{{ url_for('checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+
+    <button class="btn btn-outline" id="clear-cart-btn">Clear Cart</button>
+  </div>
+  {% else %}
+  <div class="empty-cart">
+    <p>Your cart is empty.</p>
+    <a href="{{ url_for('pricing') }}" class="btn btn-primary">Browse Plans</a>
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel legal-panel">
+  <h2>Cart & Checkout Policy</h2>
+  <p><strong>NO REFUNDS.</strong> All sales are final. Once payment is confirmed, licenses cannot be returned or refunded.</p>
+  <p>Digital licenses are delivered instantly upon successful payment verification.</p>
+  <p>Payment methods accepted: PayPal, Venmo, Pay Later, Credit Cards (Visa, Mastercard, American Express)</p>
+  <p>If you experience any issues, contact support at {{ support_email }}</p>
+</section>
+</div>
+
+<style>
+.cart-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cart-table thead {
+  background: #333;
+  color: white;
+}
+
+.cart-table th, .cart-table td {
