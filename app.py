@@ -1,10 +1,10 @@
 import os
 import sys
 
-# Add current directory to path for imports
-sys.path.insert(0, os.path.dirname(__file__))
+# Add live_portal directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'live_portal'))
 
-from live_portal.app import app
+from app import app
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
