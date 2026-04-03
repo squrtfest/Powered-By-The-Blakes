@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Add current directory to path for imports
+sys.path.insert(0, os.path.dirname(__file__))
+
 from live_portal.app import app
 
 if __name__ == "__main__":
